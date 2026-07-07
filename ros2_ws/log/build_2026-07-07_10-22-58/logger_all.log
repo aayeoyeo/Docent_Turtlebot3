@@ -1,0 +1,130 @@
+[2.781s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--symlink-install']
+[2.782s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=True, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=4, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, mixin_files=None, mixin=None, verb_parser=<colcon_mixin.mixin.mixin_argument.MixinArgumentDecorator object at 0xffffb0b1ad10>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0xffffb0cb0070>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0xffffb0cb0070>>, mixin_verb=('build',))
+[3.651s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[8.163s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[8.164s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[8.164s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[8.165s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[8.165s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[8.166s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/robot/여/project-root/ros2_ws'
+[8.167s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[8.168s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[8.169s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[8.170s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[8.170s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[8.171s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[8.172s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[8.172s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[8.173s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[8.226s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[8.226s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[8.226s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[8.227s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[8.227s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[8.228s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[8.228s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[8.228s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[8.229s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[8.230s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[8.230s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[8.231s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[8.231s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[8.231s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[8.232s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[8.232s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[8.232s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[8.233s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[8.233s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[8.233s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[8.233s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[8.234s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[8.234s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[8.235s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[8.235s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[8.235s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[8.236s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[8.236s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[8.236s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extensions ['ignore', 'ignore_ament_install']
+[8.237s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extension 'ignore'
+[8.237s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extension 'ignore_ament_install'
+[8.237s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extensions ['colcon_pkg']
+[8.237s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extension 'colcon_pkg'
+[8.238s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extensions ['colcon_meta']
+[8.238s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extension 'colcon_meta'
+[8.238s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extensions ['ros']
+[8.238s] Level 1:colcon.colcon_core.package_identification:_identify(src/docent_robot) by extension 'ros'
+[8.249s] DEBUG:colcon.colcon_core.package_identification:Package 'src/docent_robot' with type 'ros.ament_python' and name 'docent_robot'
+[8.249s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[8.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[8.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[8.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[8.250s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[8.384s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[8.385s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[8.397s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 8 installed packages in /home/robot/turtlebot3_ws/install
+[8.408s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 339 installed packages in /opt/ros/humble
+[8.418s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_args' from command line to 'None'
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_target' from command line to 'None'
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_clean_cache' from command line to 'False'
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_clean_first' from command line to 'False'
+[8.670s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'cmake_force_configure' from command line to 'False'
+[8.671s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'ament_cmake_args' from command line to 'None'
+[8.671s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'catkin_cmake_args' from command line to 'None'
+[8.671s] Level 5:colcon.colcon_core.verb:set package 'docent_robot' build argument 'catkin_skip_building_tests' from command line to 'False'
+[8.671s] DEBUG:colcon.colcon_core.verb:Building package 'docent_robot' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/robot/여/project-root/ros2_ws/build/docent_robot', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/robot/여/project-root/ros2_ws/install/docent_robot', 'merge_install': False, 'path': '/home/robot/여/project-root/ros2_ws/src/docent_robot', 'symlink_install': True, 'test_result_base': None}
+[8.672s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[8.675s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[8.676s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/robot/여/project-root/ros2_ws/src/docent_robot' with build type 'ament_python'
+[8.678s] Level 1:colcon.colcon_core.shell:create_environment_hook('docent_robot', 'ament_prefix_path')
+[8.689s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[8.690s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/ament_prefix_path.ps1'
+[8.694s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/ament_prefix_path.dsv'
+[8.697s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/ament_prefix_path.sh'
+[8.701s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[8.701s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[13.119s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/robot/여/project-root/ros2_ws/src/docent_robot'
+[13.120s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[13.120s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[18.912s] DEBUG:colcon.colcon_core.task.python.build:Available setuptools commands: develop, setopt, upload, build, bdist_egg, saveopts, install_data, easy_install, compile_catalog, clean, check, extract_messages, build_scripts, install_egg_info, dist_info, register, install_scripts, init_catalog, bdist_rpm, install_lib, build_py, egg_info, upload_docs, sdist, build_clib, alias, bdist, bdist_dumb, install, test, symlink_data, build_ext, rotate, install_headers, update_catalog
+[20.316s] DEBUG:colcon.colcon_core.task.python.build:Available setuptools 'develop' options: --zip-ok, --install-layout, --record, --script-dir, --install-dir, --egg-path, --find-links, --always-copy, --dry-run, --quiet, --allow-hosts, --version, --multi-version, --site-dirs, --always-unzip, --user, --exclude-scripts, --no-user-cfg, --prefix, --optimize, --upgrade, --no-deps, --force-installation-into-system-dir, --index-url, --local-snapshots-ok, --verbose, --uninstall, --help, --build-directory, --editable, --no-find-links
+[24.985s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/robot/여/project-root/ros2_ws/build/docent_robot': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data
+[32.005s] Level 1:colcon.colcon_core.shell:create_environment_hook('docent_robot', 'pythonpath_develop')
+[32.007s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/build/docent_robot/share/docent_robot/hook/pythonpath_develop.ps1'
+[32.009s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/robot/여/project-root/ros2_ws/build/docent_robot' returned '0': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data
+[32.012s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/robot/여/project-root/ros2_ws/build/docent_robot/share/docent_robot/hook/pythonpath_develop.dsv'
+[32.015s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/build/docent_robot/share/docent_robot/hook/pythonpath_develop.sh'
+[32.041s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot' for CMake module files
+[32.043s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot' for CMake config files
+[32.047s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot/lib'
+[32.049s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot/bin'
+[32.049s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/pkgconfig/docent_robot.pc'
+[32.051s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages'
+[32.051s] Level 1:colcon.colcon_core.shell:create_environment_hook('docent_robot', 'pythonpath')
+[32.052s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/pythonpath.ps1'
+[32.055s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/pythonpath.dsv'
+[32.057s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/hook/pythonpath.sh'
+[32.061s] Level 1:colcon.colcon_core.environment:checking '/home/robot/여/project-root/ros2_ws/install/docent_robot/bin'
+[32.063s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(docent_robot)
+[32.065s] INFO:colcon.colcon_core.shell:Creating package script '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/package.ps1'
+[32.071s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/package.dsv'
+[32.074s] INFO:colcon.colcon_core.shell:Creating package script '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/package.sh'
+[32.078s] INFO:colcon.colcon_core.shell:Creating package script '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/package.bash'
+[32.083s] INFO:colcon.colcon_core.shell:Creating package script '/home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot/package.zsh'
+[32.087s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/robot/여/project-root/ros2_ws/install/docent_robot/share/colcon-core/packages/docent_robot)
+[32.089s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[32.090s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[32.092s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[32.092s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[32.095s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[32.096s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/robot/여/project-root/ros2_ws/install/local_setup.ps1'
+[32.101s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/robot/여/project-root/ros2_ws/install/_local_setup_util_ps1.py'
+[32.108s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/robot/여/project-root/ros2_ws/install/setup.ps1'
+[32.118s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/robot/여/project-root/ros2_ws/install/local_setup.sh'
+[32.121s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/robot/여/project-root/ros2_ws/install/_local_setup_util_sh.py'
+[32.125s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/robot/여/project-root/ros2_ws/install/setup.sh'
+[32.134s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/robot/여/project-root/ros2_ws/install/local_setup.bash'
+[32.137s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/robot/여/project-root/ros2_ws/install/setup.bash'
+[32.146s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/robot/여/project-root/ros2_ws/install/local_setup.zsh'
+[32.149s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/robot/여/project-root/ros2_ws/install/setup.zsh'

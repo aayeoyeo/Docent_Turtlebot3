@@ -1,0 +1,32 @@
+running develop
+Removing /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent-robot.egg-link (link to .)
+running egg_info
+writing ../../build/docent_robot/docent_robot.egg-info/PKG-INFO
+writing dependency_links to ../../build/docent_robot/docent_robot.egg-info/dependency_links.txt
+writing entry points to ../../build/docent_robot/docent_robot.egg-info/entry_points.txt
+writing requirements to ../../build/docent_robot/docent_robot.egg-info/requires.txt
+writing top-level names to ../../build/docent_robot/docent_robot.egg-info/top_level.txt
+reading manifest file '../../build/docent_robot/docent_robot.egg-info/SOURCES.txt'
+writing manifest file '../../build/docent_robot/docent_robot.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/robot/여/project-root/ros2_ws/build/docent_robot/build
+creating /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib
+creating /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib/docent_robot
+copying docent_robot/__init__.py -> /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib/docent_robot
+copying docent_robot/docent_node.py -> /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib/docent_robot
+running install
+running install_lib
+creating /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot
+copying /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib/docent_robot/__init__.py -> /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot
+copying /home/robot/여/project-root/ros2_ws/build/docent_robot/build/lib/docent_robot/docent_node.py -> /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot
+byte-compiling /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot/docent_node.py to docent_node.cpython-310.pyc
+running install_data
+copying resource/docent_robot -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/ament_index/resource_index/packages
+copying package.xml -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot
+running install_egg_info
+Copying ../../build/docent_robot/docent_robot.egg-info to /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent_robot-0.0.0-py3.10.egg-info
+running install_scripts
+Installing docent_node script to /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/docent_robot
+writing list of installed files to '/home/robot/여/project-root/ros2_ws/build/docent_robot/install.log'

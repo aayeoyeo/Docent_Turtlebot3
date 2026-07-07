@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로봇 센서 통합 인터페이스</title>
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #222; color: white;}
+        #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; background: #000; }
+        button { padding: 15px 30px; font-size: 20px; margin: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;}
+        .status { margin-top: 20px; padding: 10px; background: #333; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🤖 도슨트 센서 모듈</h1>
+    <button id="startBtn">투어 준비 (클릭 필수)</button>
+    <div id="reader"></div>
+    <div class="status">
+        <p>ROS 연결 상태: <span id="ros_status" style="color:red;">끊김</span></p>
+        <p>최근 본 QR: <span id="last_qr">-</span></p>
+        <button id="faceBtn" style="background-color: #008CBA; pointer-events: none;">👤 관람객 대기 중...</button>
+    </div>
+
+    <script>
+        // 1. ROS 연결
+        const ros = new ROSLIB.Ros({ url: 'ws://' + window.location.hostname + ':9090' });
+        
+        ros.on('connection', () => { document.getElementById('ros_status').innerText = '연결됨'; document.getElementById('ros_status').style.color = 'lime'; });
+        ros.on('error', () => { document.getElementById('ros_status').innerText = '에러'; });
+        ros.on('close', () => { document.getElementById('ros_status').innerText = '끊김'; document.getElementById('ros_status').style.color = 'red'; });
+
+        // 토픽 정의
+        const ttsTextTopic = new ROSLIB.Topic({ ros: ros, name: '/tts_text', messageType: 'std_msgs/String' });
+        const ttsDoneTopic = new ROSLIB.Topic({ ros: ros, name: '/tts_done', messageType: 'std_msgs/Bool' });
+        const qrTopic = new ROSLIB.Topic({ ros: ros, name: '/exhibit_seen', messageType: 'std_msgs/String' });
+        const audienceTopic = new ROSLIB.Topic({ ros: ros, name: '/audience', messageType: 'std_msgs/Bool' });
+        const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
+
+        // 2. TTS 설정
+        let ttsEnabled = false;
+        document.getElementById('startBtn').addEventListener('click', () => {
+            ttsEnabled = true;
+            document.getElementById('startBtn').innerText = "준비 완료 (재생 대기중)";
+            document.getElementById('startBtn').style.backgroundColor = "#555";
+            const u = new SpeechSynthesisUtterance(""); 
+            window.speechSynthesis.speak(u);
+        });
+
+        ttsTextTopic.subscribe((msg) => {
+            if(!ttsEnabled) return alert("투어 준비 버튼을 먼저 눌러주세요!");
+            const u = new SpeechSynthesisUtterance(msg.data);
+            u.lang = 'ko-KR';
+            u.rate = 1.0; 
+            u.onend = () => {
+                console.log("TTS 완료, tts_done 발행");
+                ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
+            };
+            window.speechSynthesis.speak(u);
+        });
+
+        // 3. QR 스캐너 설정
+        const html5QrCode = new Html5Qrcode("reader");
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            document.getElementById('last_qr').innerText = decodedText;
+            qrTopic.publish(new ROSLIB.Message({ data: decodedText }));
+        };
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback).catch(err => console.log(err));
+
+        // 4 & 5. 관람객 인식 및 CCTV 스트리밍 로직
+        let hasAudience = false;
+        setTimeout(() => {
+            const videoElement = document.querySelector('#reader video');
+            
+            if (videoElement) {
+                // [A] tracking.js 얼굴 인식기 세팅
+                const tracker = new tracking.ObjectTracker('face');
+                tracker.setInitialScale(4);
+                tracker.setStepSize(2);
+                tracker.setEdgesDensity(0.1);
+                tracking.track(videoElement, tracker);
+                
+                tracker.on('track', function(event) {
+                    if (event.data.length > 0 && !hasAudience) {
+                        hasAudience = true;
+                        document.getElementById('faceBtn').innerText = "👤 카메라 얼굴 인식 완료!";
+                        document.getElementById('faceBtn').style.backgroundColor = "#4CAF50"; 
+                        audienceTopic.publish(new ROSLIB.Message({ data: true }));
+                        
+                        setTimeout(() => {
+                            hasAudience = false;
+                            document.getElementById('faceBtn').innerText = "👤 관람객 대기 중...";
+                            document.getElementById('faceBtn').style.backgroundColor = "#555";
+                            audienceTopic.publish(new ROSLIB.Message({ data: false }));
+                        }, 5000);
+                    }
+                });
+
+                // [B] CCTV 영상 캡처 및 전송
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 320;  // 통신 부하 방지용 저해상도
+                canvas.height = 240;
+
+                setInterval(() => {
+                    if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                        const frameData = canvas.toDataURL('image/jpeg', 0.3); // 화질 압축
+                        cameraStreamTopic.publish(new ROSLIB.Message({ data: frameData }));
+                    }
+                }, 250); // 0.25초 단위 전송
+
+            } else {
+                console.error("비디오 태그를 찾을 수 없습니다.");
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

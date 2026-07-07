@@ -1,0 +1,19 @@
+[4.342s] Invoking command in '/home/robot/여/project-root/ros2_ws/build/docent_robot': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data --force
+[5.578s] running develop
+[6.412s] running egg_info
+[6.412s] writing docent_robot.egg-info/PKG-INFO
+[6.414s] writing dependency_links to docent_robot.egg-info/dependency_links.txt
+[6.414s] writing entry points to docent_robot.egg-info/entry_points.txt
+[6.415s] writing requirements to docent_robot.egg-info/requires.txt
+[6.416s] writing top-level names to docent_robot.egg-info/top_level.txt
+[6.424s] reading manifest file 'docent_robot.egg-info/SOURCES.txt'
+[6.427s] writing manifest file 'docent_robot.egg-info/SOURCES.txt'
+[6.433s] running build_ext
+[6.434s] Creating /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent-robot.egg-link (link to .)
+[6.437s] Installing docent_node script to /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/docent_robot
+[6.439s] 
+[6.439s] Installed /home/robot/여/project-root/ros2_ws/build/docent_robot
+[6.440s] running symlink_data
+[6.440s] symbolically linking /home/robot/여/project-root/ros2_ws/build/docent_robot/resource/docent_robot -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/ament_index/resource_index/packages
+[6.441s] symbolically linking /home/robot/여/project-root/ros2_ws/build/docent_robot/package.xml -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot
+[6.576s] Invoked command in '/home/robot/여/project-root/ros2_ws/build/docent_robot' returned '0': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data --force

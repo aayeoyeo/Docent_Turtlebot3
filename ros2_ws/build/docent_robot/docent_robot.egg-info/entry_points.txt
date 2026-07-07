@@ -1,0 +1,3 @@
+[console_scripts]
+docent_node = docent_robot.docent_node:main
+

@@ -18,37 +18,45 @@
 * **Software / Framework:** ROS 2 (Humble), Python 3
 * **Web & AI:** HTML5, JavaScript, `roslibjs` (WebSockets), `tracking.js` (Face Detection), Web Speech API
 
-## 🛠️ 공통 작업 (터틀봇3, 노트북)
+🛠 1. 공통 작업 (터틀봇3, 우분투 노트북)
+ROS 2 환경 변수 설정
 
-**1. bashrc 파일 맨 아래에 export 명령어 추가**
-```bash
-echo "export ROS_DOMAIN_ID=10" >> ~/.bashrc
+로봇과 노트북이 통신할 수 있도록 고유 도메인 ID를 설정합니다. 터미널을 열고 아래 명령어를 입력하세요.
+Bash
 
-2. 노트북 패키지 설치 및 설정 반영
+echo "export ROS_DOMAIN_ID=7" >> ~/.bashrc
+source ~/.bashrc
+
+노트북 필수 패키지 설치
+
+노트북 터미널에서 웹 소켓 통신을 위한 브릿지 패키지를 설치합니다.
 Bash
 
 sudo apt update
 sudo apt install ros-humble-rosbridge-suite
-source ~/.bashrc
 
-🍓 라즈베리파이 / 터틀봇3 세팅
+🍓 2. 라즈베리파이 (터틀봇3) 패키지 세팅
+워크스페이스 및 패키지 생성
 
-1. 워크스페이스 및 패키지 생성
+라즈베리파이에 SSH로 접속한 뒤 아래 명령어를 순서대로 입력합니다.
 Bash
 
-mkdir project-root
-cd project-root
-mkdir -p ros2_ws/src
-cd ros2_ws/src
+mkdir -p ~/project-root/ros2_ws/src
+cd ~/project-root/ros2_ws/src
 ros2 pkg create --build-type ament_python docent_robot --dependencies rclpy std_msgs geometry_msgs
-cd docent_robot/docent_robot
 
-2. 도슨트 노드 코드 작성
-vim docent_node.py를 열고 아래 코드를 넣습니다.
+도슨트 노드(파이썬) 코드 작성
+Bash
+
+cd ~/project-root/ros2_ws/src/docent_robot/docent_robot
+nano docent_node.py
+
+편집기가 열리면 아래 코드를 전체 복사하여 붙여넣고 저장합니다. (Ctrl+O -> Enter -> Ctrl+X)
 Python
 
 #!/usr/bin/env python3
-import json, time
+import json
+import time
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Bool
@@ -56,26 +64,31 @@ from geometry_msgs.msg import Twist
 
 CRUISE = 0.08
 WAIT_AUDIENCE = 20.0       # 관람객 미확인 최대 대기 (초)
-MOVE_TIMEOUT = 30.0        # QR 미인식 시 최대 이동 시간 (초) - 알려진 한계 ① 해결
+MOVE_TIMEOUT = 30.0        # QR 미인식 시 최대 이동 시간 (초)
 
 class DocentNode(Node):
     def __init__(self):
         super().__init__('docent_node')
+        # Subscriber 등록
         self.sub_course = self.create_subscription(String, '/course', self.on_course, 10)
         self.sub_qr = self.create_subscription(String, '/exhibit_seen', self.on_qr, 10)
         self.sub_tts = self.create_subscription(Bool, '/tts_done', self.on_tts_done, 10)
         self.sub_face = self.create_subscription(Bool, '/audience', self.on_audience, 10)
+        self.sub_phase = self.create_subscription(String, '/set_phase', self.on_set_phase, 10)
         
+        # Publisher 등록
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pub_tts = self.create_publisher(String, '/tts_text', 10)
         self.pub_state = self.create_publisher(String, '/tour_state', 10)
         
+        # 상태 변수 초기화
         self.course = []          
         self.idx = 0
-        self.phase = 'IDLE'       # IDLE -> MOVE -> EXPLAIN -> CHECK
+        self.phase = 'IDLE'       
         self.audience = False
         self.state_since = time.time()
         
+        # 10Hz 제어 타이머 주기 구동
         self.timer = self.create_timer(0.1, self.tick)
         self.get_logger().info('도슨트 로봇 백엔드 시스템 구동 완료')
 
@@ -89,6 +102,14 @@ class DocentNode(Node):
         }, ensure_ascii=False)
         self.pub_state.publish(msg)
 
+    def on_set_phase(self, msg):
+        self.get_logger().warn(f"관리자 개입: 상태가 {msg.data}(으)로 강제 전환됩니다.")
+        stop_cmd = Twist()
+        self.pub_vel.publish(stop_cmd)
+        self.phase = msg.data
+        self.state_since = time.time()
+        self.broadcast()
+
     def on_course(self, msg):
         self.get_logger().info('새로운 코스가 할당되었습니다.')
         self.course = json.loads(msg.data)
@@ -101,6 +122,8 @@ class DocentNode(Node):
         if self.phase == 'MOVE' and self.course:
             if msg.data == self.course[self.idx]['id']:
                 self.get_logger().info(f"전시물 {msg.data} 도착. 해설을 시작합니다.")
+                stop_cmd = Twist()
+                self.pub_vel.publish(stop_cmd)
                 self.phase = 'EXPLAIN'
                 tts = String()
                 tts.data = self.course[self.idx]['script']
@@ -118,17 +141,20 @@ class DocentNode(Node):
         self.audience = bool(msg.data)
 
     def tick(self):
-        cmd = Twist()
         now = time.time()
         elapsed = now - self.state_since
         
         if self.phase == 'MOVE':
             if elapsed > MOVE_TIMEOUT:
                 self.get_logger().warn("QR 미인식 타임아웃! 로봇을 정지합니다.")
+                stop_cmd = Twist()
+                self.pub_vel.publish(stop_cmd)
                 self.phase = 'IDLE'
                 self.broadcast()
             else:
-                cmd.linear.x = CRUISE # 곡선 주행이 필요하다면 angular.z 값 추가 로직 필요
+                cmd = Twist()
+                cmd.linear.x = CRUISE
+                self.pub_vel.publish(cmd)
                 
         elif self.phase == 'CHECK':
             if self.audience or elapsed > WAIT_AUDIENCE:
@@ -144,8 +170,6 @@ class DocentNode(Node):
                 else:
                     self.phase = 'IDLE'
                 self.broadcast()
-                
-        self.pub_vel.publish(cmd)
 
 def main():
     rclpy.init()
@@ -161,8 +185,15 @@ def main():
 if __name__ == '__main__':
     main()
 
-3. 빌드 설정 및 실행
-cd ~/project-root/ros2_ws/src/docent_robot/ 이동 후 vim setup.py에서 entry_points 수정:
+setup.py 수정 및 패키지 빌드
+
+명령어 실행 경로를 등록하기 위해 setup.py를 수정합니다.
+Bash
+
+cd ~/project-root/ros2_ws/src/docent_robot
+nano setup.py
+
+entry_points 부분을 찾아 아래와 같이 수정하고 저장합니다.
 Python
 
     entry_points={
@@ -171,21 +202,27 @@ Python
         ],
     },
 
-이후 워크스페이스 빌드:
+수정이 완료되면 워크스페이스를 빌드합니다.
 Bash
 
 cd ~/project-root/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 
-💻 노트북 우분투 웹 서버 세팅
+💻 3. 노트북(관제탑) 웹 서버 세팅
+
+노트북 터미널에서 웹 파일용 디렉터리를 만들고 이동합니다.
 Bash
 
 mkdir -p ~/project-root/docent_web
 cd ~/project-root/docent_web
 
-1. robot.html (스마트폰 뷰어)
-vim robot.html
+robot.html (스마트폰 뷰어) 생성
+Bash
+
+nano robot.html
+
+아래 HTML 코드를 붙여넣고 저장합니다.
 HTML
 
 <!DOCTYPE html>
@@ -194,10 +231,10 @@ HTML
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로봇 센서 통합 인터페이스</title>
-    <script src="[https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js](https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js)"></script>
-    <script src="[https://unpkg.com/html5-qrcode](https://unpkg.com/html5-qrcode)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js](https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js](https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js)"></script>
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/tracking-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.1.3/data/face-min.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #222; color: white;}
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; background: #000; }
@@ -243,7 +280,6 @@ HTML
             u.lang = 'ko-KR';
             u.rate = 1.0; 
             u.onend = () => {
-                console.log("TTS 완료, tts_done 발행");
                 ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
             };
             window.speechSynthesis.speak(u);
@@ -296,17 +332,18 @@ HTML
                         cameraStreamTopic.publish(new ROSLIB.Message({ data: frameData }));
                     }
                 }, 250); 
-
-            } else {
-                console.error("비디오 태그를 찾을 수 없습니다.");
             }
         }, 3000);
     </script>
 </body>
 </html>
 
-2. admin.html (관리자용)
-vim admin.html
+admin.html (관리자 관제탑) 생성
+Bash
+
+nano admin.html
+
+아래 HTML 코드를 붙여넣고 저장합니다.
 HTML
 
 <!DOCTYPE html>
@@ -315,7 +352,7 @@ HTML
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도슨트 로봇 관리자</title>
-    <script src="[https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js](https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js)"></script>
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
         .panel { background: #fff; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -435,49 +472,63 @@ HTML
 </body>
 </html>
 
-🚀 최종 실행 가이드
-1. 스마트폰 카메라 설정 (사전 준비)
+📱 4. 스마트폰 카메라 권한 설정 (사전 준비)
 
-    스마트폰 크롬 주소창에 chrome://flags 입력 후 접속
+스마트폰 브라우저에서 카메라를 웹 서버로 허용하기 위한 작업입니다.
+
+    스마트폰 크롬 브라우저 주소창에 chrome://flags 입력 후 접속
 
     검색창에 insecure 검색
 
-    Insecure origins treated as secure 항목에 노트북 주소(http://노트북IP:8000) 입력 후 [Enabled] 변경
+    Insecure origins treated as secure 항목 하단 빈칸에 노트북 주소(http://노트북IP:8000) 입력
 
-    화면 하단 [Relaunch] 버튼 클릭
+    버튼을 [Enabled]로 변경 후 하단의 파란색 [Relaunch] 버튼 클릭
 
-2. 터미널 실행 순서
+🚀 5. 최종 실행 가이드 (터미널 4개 구동)
 
-터미널 4개를 열고 순서대로 실행합니다.
+터미널 4개를 열고 아래 순서대로 실행합니다.
+🍓 [터미널 1] 라즈베리파이: 로봇 하드웨어 구동
 
-🍓 [터미널 1] 라즈베리파이: 하드웨어 구동
+가장 먼저 로봇의 모터와 센서를 깨우는 작업입니다.
 Bash
 
 ros2 launch turtlebot3_bringup robot.launch.py
 
-💻 [터미널 2] 노트북: ROS-Web 브릿지 연결
+(실행 후 여러 로그가 올라가면 성공입니다. 창을 그대로 둡니다.)
+💻 [터미널 2] 노트북: ROS-Web 통신 브릿지 연결
+
+로봇과 웹 브라우저가 대화할 수 있게 통신망을 엽니다.
 Bash
 
-source /opt/ros/humble/setup.bash
 ros2 launch rosbridge_server rosbridge_websocket_launch.xml
 
+(Rosbridge WebSocket server started on port 9090 문구가 뜨면 성공)
 💻 [터미널 3] 노트북: 로컬 웹 서버 구동
+
+우리가 만든 HTML 파일들을 스마트폰에서 접속할 수 있게 서버를 엽니다.
 Bash
 
 cd ~/project-root/docent_web
 python3 -m http.server 8000
 
-🍓 [터미널 4] 라즈베리파이: 도슨트 메인 노드 구동
+(Serving HTTP on 0.0.0.0 port 8000이 뜨면 성공)
+🍓 [터미널 4] 라즈베리파이: 도슨트 메인 노드(두뇌) 구동
+
+로봇의 주행과 AI를 통제하는 메인 파이썬 코드를 실행합니다.
 Bash
 
-cd ~/project-root/ros2_ws/
+cd ~/project-root/ros2_ws
 source install/setup.bash
 ros2 run docent_robot docent_node
 
-3. 접속 및 투어 시작
+([INFO] [docent_node]: 도슨트 로봇 백엔드 시스템 구동 완료가 뜨면 성공)
+🎮 6. 접속 및 시스템 운영
 
-    스마트폰(로봇 부착): http://<노트북IP>:8000/robot.html 접속 -> 권한 허용 -> [투어 준비] 클릭
+    스마트폰 (로봇 거치용): http://<노트북IP>:8000/robot.html
+    접속 후 카메라 권한을 허용하고 [투어 준비] 버튼을 반드시 클릭해야 합니다. 이 스마트폰이 로봇의 '눈(카메라)'과 '입(TTS 음성)' 역할을 합니다.
 
-    노트북(관제탑): http://localhost:8000/admin.html 접속 -> 코스 확인 -> [코스 로봇에 주입] 클릭
+    노트북 (관리자용): http://localhost:8000/admin.html
+    노트북 화면에 띄워두고 코스를 주입하거나 수동으로 로봇을 제어하는 관제탑입니다.
 
-    QR 생성: qr-code-generator.com 등에서 텍스트 모드로 E1, E2 생성
+    투어 코스용 QR 생성:
+    qr-code-generator.com 등의 사이트에서 텍스트(Text) 모드로 E1, E2 값을 가진 QR코드를 생성하여 전시장(벽면)에 부착합니다.

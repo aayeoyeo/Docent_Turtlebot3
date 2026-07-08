@@ -14,7 +14,6 @@
         .btn-red { background: #e74c3c; }
         .btn-green { background: #2ecc71; }
         
-        /* 조이패드(방향키) 스타일 */
         .d-pad { display: grid; grid-template-columns: repeat(3, 60px); grid-gap: 10px; justify-content: center; margin-top: 20px; }
         .d-pad button { padding: 15px; font-size: 16px; cursor: pointer; background: #ddd; border: none; border-radius: 5px; user-select: none; font-weight: bold;}
         .d-pad button:active { background: #bbb; }
@@ -44,10 +43,10 @@
             </div>
 
             <div class="d-pad">
-                <button class="btn-up" onmousedown="moveRobot(0.1, 0)" onmouseup="stopRobot()">전진</button>
-                <button class="btn-left" onmousedown="moveRobot(0, 0.5)" onmouseup="stopRobot()">좌</button>
-                <button class="btn-right" onmousedown="moveRobot(0, -0.5)" onmouseup="stopRobot()">우</button>
-                <button class="btn-down" onmousedown="moveRobot(-0.1, 0)" onmouseup="stopRobot()">후진</button>
+                <button class="btn-up" onmousedown="moveRobot(0.2, 0)" onmouseup="stopRobot()">전진</button>
+                <button class="btn-left" onmousedown="moveRobot(0, 1.0)" onmouseup="stopRobot()">좌</button>
+                <button class="btn-right" onmousedown="moveRobot(0, -1.0)" onmouseup="stopRobot()">우</button>
+                <button class="btn-down" onmousedown="moveRobot(-0.2, 0)" onmouseup="stopRobot()">후진</button>
             </div>
             <p style="text-align:center; font-size: 13px; color: #666; margin-top:10px;">* 방향키를 마우스로 꾹 누르면 이동합니다.</p>
         </div>
@@ -57,6 +56,12 @@
                 <h3>📊 투어 현황 모니터링</h3>
                 <p>현재 상태: <strong id="phase" style="color:blue; font-size:20px;">IDLE</strong></p>
                 <p>진행 상황: <span id="progress">0 / 0</span> (현재 타겟: <span id="current">None</span>)</p>
+                
+                <hr style="border-color: #ddd; margin-top: 15px;">
+                <h4 style="margin-bottom: 5px;">⏱️ 관람 체류 통계</h4>
+                <ul id="statsList" style="text-align: left; font-size: 14px; color: #555; background: #f9f9f9; padding: 15px 25px; border-radius: 5px; max-height: 120px; overflow-y: auto; margin-top: 0;">
+                    <li>아직 기록된 통계가 없습니다.</li>
+                </ul>
             </div>
 
             <div class="panel">
@@ -80,8 +85,10 @@
         const cmdVelTopic = new ROSLIB.Topic({ ros: ros, name: '/cmd_vel', messageType: 'geometry_msgs/Twist' });
         const setPhaseTopic = new ROSLIB.Topic({ ros: ros, name: '/set_phase', messageType: 'std_msgs/String' });
         const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
+        
+        // [S3] 통계 토픽 수신용
+        const statsTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_stats', messageType: 'std_msgs/String' });
 
-        // 상태 모니터링
         stateTopic.subscribe((msg) => {
             const state = JSON.parse(msg.data);
             document.getElementById('phase').innerText = state.phase;
@@ -92,29 +99,44 @@
             document.getElementById('current').innerText = state.current_exhibit;
         });
 
-        // CCTV 스트리밍 수신
         cameraStreamTopic.subscribe((msg) => {
             document.getElementById('cctv').src = msg.data;
         });
 
-        // 코스 전송
+        // [S3] 통계 화면 업데이트
+        statsTopic.subscribe((msg) => {
+            const statsArray = JSON.parse(msg.data);
+            const statsList = document.getElementById('statsList');
+            statsList.innerHTML = ''; 
+            statsArray.forEach(stat => {
+                const li = document.createElement('li');
+                li.innerText = stat;
+                statsList.appendChild(li);
+            });
+            statsList.scrollTop = statsList.scrollHeight;
+        });
+
+        // 코스 주입 로직 개선 (에러 상세 표시 및 클린 전송)
         function sendCourse() {
             const data = document.getElementById('courseJson').value;
             try {
-                JSON.parse(data); 
-                courseTopic.publish(new ROSLIB.Message({ data: data }));
+                // 사용자 입력을 한 번 파싱하여 문법이 맞는지 검증
+                const parsedData = JSON.parse(data); 
+                
+                // 파싱된 데이터를 다시 안전한 문자열로 변환하여 전송
+                const cleanData = JSON.stringify(parsedData);
+                courseTopic.publish(new ROSLIB.Message({ data: cleanData }));
                 alert("코스가 성공적으로 전송되었습니다!");
             } catch (e) {
-                alert("JSON 형식이 잘못되었습니다. 오타를 확인해주세요.");
+                alert("JSON 형식이 잘못되었습니다.\n따옴표나 콤마 오타를 확인해주세요!\n\n상세 에러: " + e.message);
             }
         }
 
-        // 수동/자동 상태 전환
         function setPhase(newPhase) {
             setPhaseTopic.publish(new ROSLIB.Message({ data: newPhase }));
         }
 
-        // 조이패드 이동 (마우스 클릭 중)
+        // 조이패드 이동
         function moveRobot(linear, angular) {
             const twist = new ROSLIB.Message({
                 linear: { x: linear, y: 0.0, z: 0.0 },
@@ -123,7 +145,7 @@
             cmdVelTopic.publish(twist);
         }
 
-        // 조이패드 정지 (마우스 뗐을 때)
+        // 조이패드 정지
         function stopRobot() {
             moveRobot(0.0, 0.0);
         }

@@ -88,19 +88,24 @@ class DocentNode(Node):
         self.sub_tts = self.create_subscription(Bool, '/tts_done', self.on_tts_done, 10)
         self.sub_face = self.create_subscription(Bool, '/audience', self.on_audience, 10)
         self.sub_phase = self.create_subscription(String, '/set_phase', self.on_set_phase, 10)
-
+        
         # Publisher 등록
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pub_tts = self.create_publisher(String, '/tts_text', 10)
         self.pub_state = self.create_publisher(String, '/tour_state', 10)
-
+        self.pub_stats = self.create_publisher(String, '/tour_stats', 10)
+        
         # 상태 변수 초기화
-        self.course = []
+        self.course = []          
         self.idx = 0
-        self.phase = 'IDLE'
+        self.phase = 'IDLE'       
         self.audience = False
         self.state_since = time.time()
-
+        
+        # [S3] 도착 시간 및 통계 리스트 초기화
+        self.arrive_time = 0.0
+        self.tour_stats = []
+        
         # 10Hz 제어 타이머 주기 구동
         self.timer = self.create_timer(0.1, self.tick)
         self.get_logger().info('도슨트 로봇 백엔드 시스템 구동 완료')
@@ -108,10 +113,12 @@ class DocentNode(Node):
     def broadcast(self):
         msg = String()
         msg.data = json.dumps({
-            'phase': self.phase,
+            'phase': self.phase, 
             'idx': self.idx,
             'total': len(self.course),
-            'current_exhibit': self.course[self.idx]['id'] if self.course and self.idx < len(self.course) else 'None'
+            'current_exhibit': self.course[self.idx]['id'] if self.course and self.idx < len(self.course) else 'None',
+            # [LCD 대체] 현재 전시물의 실제 제목 전송
+            'current_title': self.course[self.idx]['title'] if self.course and self.idx < len(self.course) else 'None'
         }, ensure_ascii=False)
         self.pub_state.publish(msg)
 
@@ -135,8 +142,13 @@ class DocentNode(Node):
         if self.phase == 'MOVE' and self.course:
             if msg.data == self.course[self.idx]['id']:
                 self.get_logger().info(f"전시물 {msg.data} 도착. 해설을 시작합니다.")
+                
                 stop_cmd = Twist()
                 self.pub_vel.publish(stop_cmd)
+                
+                # [S3] 도착 시간 기록
+                self.arrive_time = time.time()
+                
                 self.phase = 'EXPLAIN'
                 tts = String()
                 tts.data = self.course[self.idx]['script']
@@ -156,7 +168,7 @@ class DocentNode(Node):
     def tick(self):
         now = time.time()
         elapsed = now - self.state_since
-
+        
         if self.phase == 'MOVE':
             if elapsed > MOVE_TIMEOUT:
                 self.get_logger().warn("QR 미인식 타임아웃! 로봇을 정지합니다.")
@@ -168,14 +180,24 @@ class DocentNode(Node):
                 cmd = Twist()
                 cmd.linear.x = CRUISE
                 self.pub_vel.publish(cmd)
-
+                
         elif self.phase == 'CHECK':
             if self.audience or elapsed > WAIT_AUDIENCE:
+                
+                # [S3] 체류 시간 계산 및 발행
+                dwell_time = time.time() - self.arrive_time
+                stat_msg = f"{self.course[self.idx]['title']} - 체류시간: {dwell_time:.1f}초"
+                self.tour_stats.append(stat_msg)
+                
+                stats_json = String()
+                stats_json.data = json.dumps(self.tour_stats, ensure_ascii=False)
+                self.pub_stats.publish(stats_json)
+
                 if self.audience:
                     self.get_logger().info("관람객 확인됨. 다음 코스로 이동.")
                 else:
                     self.get_logger().warn("관람객 부재. 20초 경과로 다음 코스로 강제 이동.")
-
+                
                 self.idx += 1
                 if self.idx < len(self.course):
                     self.phase = 'MOVE'
@@ -197,7 +219,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 ```
 
 ### setup.py 수정 및 패키지 빌드
@@ -267,21 +288,45 @@ nano robot.html
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; background: #000; }
         button { padding: 15px 30px; font-size: 20px; margin: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;}
         .status { margin-top: 20px; padding: 10px; background: #333; border-radius: 5px; }
+        
+        /* [LCD 대체] 전시물 이름 표시 전용 스타일 */
+        #exhibitDisplay { 
+            margin: 15px auto; 
+            padding: 15px; 
+            max-width: 370px; 
+            background-color: #111; 
+            border: 3px solid #4CAF50; 
+            border-radius: 8px; 
+            font-size: 26px; 
+            font-weight: bold; 
+            color: #2ecc71;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
     </style>
 </head>
 <body>
     <h1>🤖 도슨트 센서 모듈</h1>
     <button id="startBtn">투어 준비 (클릭 필수)</button>
+    
     <div id="reader"></div>
+    
+    <div id="exhibitDisplay">📢 안내 대기 중</div>
+
     <div class="status">
         <p>ROS 연결 상태: <span id="ros_status" style="color:red;">끊김</span></p>
         <p>최근 본 QR: <span id="last_qr">-</span></p>
         <button id="faceBtn" style="background-color: #008CBA; pointer-events: none;">👤 관람객 대기 중...</button>
+        
+        <hr style="border-color: #555; margin: 15px 0;">
+        <p>🗣️ <strong>TTS 재생 설정</strong></p>
+        <label for="rateSlider">재생 속도: <span id="rateValue">1.0</span>x</label><br>
+        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0" style="width: 80%;">
     </div>
 
     <script>
+        // 1. ROS 연결
         const ros = new ROSLIB.Ros({ url: 'ws://' + window.location.hostname + ':9090' });
-
+        
         ros.on('connection', () => { document.getElementById('ros_status').innerText = '연결됨'; document.getElementById('ros_status').style.color = 'lime'; });
         ros.on('error', () => { document.getElementById('ros_status').innerText = '에러'; });
         ros.on('close', () => { document.getElementById('ros_status').innerText = '끊김'; document.getElementById('ros_status').style.color = 'red'; });
@@ -291,27 +336,87 @@ nano robot.html
         const qrTopic = new ROSLIB.Topic({ ros: ros, name: '/exhibit_seen', messageType: 'std_msgs/String' });
         const audienceTopic = new ROSLIB.Topic({ ros: ros, name: '/audience', messageType: 'std_msgs/Bool' });
         const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
+        
+        // 로봇 현황 구독 토픽 추가
+        const stateTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_state', messageType: 'std_msgs/String' });
 
+        // 2. TTS 설정 (속도 조절 및 버그 방어)
         let ttsEnabled = false;
+        const rateSlider = document.getElementById('rateSlider');
+        const rateValue = document.getElementById('rateValue');
+        
+        // 메모리 증발 방지용 전역 배열
+        window.utterances = []; 
+
+        rateSlider.oninput = function() { rateValue.innerText = this.value; }
+
         document.getElementById('startBtn').addEventListener('click', () => {
             ttsEnabled = true;
             document.getElementById('startBtn').innerText = "준비 완료 (재생 대기중)";
             document.getElementById('startBtn').style.backgroundColor = "#555";
-            const u = new SpeechSynthesisUtterance("");
-            window.speechSynthesis.speak(u);
+            
+            // 모바일 오디오 권한 뚫기용
+            const emptyUtterance = new SpeechSynthesisUtterance(""); 
+            window.speechSynthesis.speak(emptyUtterance); 
         });
 
         ttsTextTopic.subscribe((msg) => {
             if(!ttsEnabled) return alert("투어 준비 버튼을 먼저 눌러주세요!");
+            
+            // 기존 발화 캔슬
+            window.speechSynthesis.cancel();
+
             const u = new SpeechSynthesisUtterance(msg.data);
+            window.utterances.push(u); // 브라우저가 u 객체를 지우지 못하도록 레퍼런스 유지
+            
+            // 크롬 내장 기본 한국어 엔진 사용
             u.lang = 'ko-KR';
-            u.rate = 1.0;
+            u.rate = parseFloat(rateSlider.value); 
+            
+            // 정상 종료 시퀀스
             u.onend = () => {
+                console.log("TTS 완료, tts_done 발행");
                 ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
             };
+            
+            // 모바일 브라우저 버그로 인한 무한 멈춤 방지
+            u.onerror = (e) => {
+                console.error("TTS 에러 발생: ", e);
+                ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
+            };
+
             window.speechSynthesis.speak(u);
         });
 
+        // [LCD 기능 구현] 로봇 상태 및 전시물 이름 표시 제어
+        stateTopic.subscribe((msg) => {
+            const state = JSON.parse(msg.data);
+            const display = document.getElementById('exhibitDisplay');
+            
+            if (state.phase === 'MOVE') {
+                display.innerText = "🏃 목적지로 이동 중...";
+                display.style.color = "#3498db";
+                display.style.borderColor = "#3498db";
+            } else if (state.phase === 'EXPLAIN') {
+                display.innerText = `🎨 전시물: ${state.current_title}`;
+                display.style.color = "#2ecc71";
+                display.style.borderColor = "#2ecc71";
+            } else if (state.phase === 'CHECK') {
+                display.innerText = "👤 관람객 확인 중...";
+                display.style.color = "#f1c40f";
+                display.style.borderColor = "#f1c40f";
+            } else if (state.phase === 'MANUAL') {
+                display.innerText = "🚨 수동 제어 모드";
+                display.style.color = "#e74c3c";
+                display.style.borderColor = "#e74c3c";
+            } else {
+                display.innerText = "📢 안내 대기 중";
+                display.style.color = "#ffffff";
+                display.style.borderColor = "#ffffff";
+            }
+        });
+
+        // 3. QR 스캐너 설정
         const html5QrCode = new Html5Qrcode("reader");
         const qrCodeSuccessCallback = (decodedText, decodedResult) => {
             document.getElementById('last_qr').innerText = decodedText;
@@ -320,24 +425,25 @@ nano robot.html
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback).catch(err => console.log(err));
 
+        // 4 & 5. 관람객 인식 및 CCTV 스트리밍 로직
         let hasAudience = false;
         setTimeout(() => {
             const videoElement = document.querySelector('#reader video');
-
+            
             if (videoElement) {
                 const tracker = new tracking.ObjectTracker('face');
                 tracker.setInitialScale(4);
                 tracker.setStepSize(2);
                 tracker.setEdgesDensity(0.1);
                 tracking.track(videoElement, tracker);
-
+                
                 tracker.on('track', function(event) {
                     if (event.data.length > 0 && !hasAudience) {
                         hasAudience = true;
                         document.getElementById('faceBtn').innerText = "👤 카메라 얼굴 인식 완료!";
-                        document.getElementById('faceBtn').style.backgroundColor = "#4CAF50";
+                        document.getElementById('faceBtn').style.backgroundColor = "#4CAF50"; 
                         audienceTopic.publish(new ROSLIB.Message({ data: true }));
-
+                        
                         setTimeout(() => {
                             hasAudience = false;
                             document.getElementById('faceBtn').innerText = "👤 관람객 대기 중...";
@@ -349,22 +455,21 @@ nano robot.html
 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = 320;
+                canvas.width = 320;  
                 canvas.height = 240;
 
                 setInterval(() => {
                     if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                        const frameData = canvas.toDataURL('image/jpeg', 0.3);
+                        const frameData = canvas.toDataURL('image/jpeg', 0.3); 
                         cameraStreamTopic.publish(new ROSLIB.Message({ data: frameData }));
                     }
-                }, 250);
+                }, 250); 
             }
         }, 3000);
     </script>
 </body>
 </html>
-
 ```
 
 ### admin.html (관리자 관제탑) 생성
@@ -392,7 +497,7 @@ nano admin.html
         .btn:hover { background: #555; }
         .btn-red { background: #e74c3c; }
         .btn-green { background: #2ecc71; }
-
+        
         .d-pad { display: grid; grid-template-columns: repeat(3, 60px); grid-gap: 10px; justify-content: center; margin-top: 20px; }
         .d-pad button { padding: 15px; font-size: 16px; cursor: pointer; background: #ddd; border: none; border-radius: 5px; user-select: none; font-weight: bold;}
         .d-pad button:active { background: #bbb; }
@@ -400,7 +505,7 @@ nano admin.html
         .btn-left { grid-column: 1; grid-row: 2; }
         .btn-right { grid-column: 3; grid-row: 2; }
         .btn-down { grid-column: 2; grid-row: 3; }
-
+        
         .cctv-container { text-align: center; margin-bottom: 20px; }
         #cctv { width: 100%; max-width: 400px; height: auto; background: #000; border: 3px solid #333; border-radius: 8px; min-height: 200px; }
     </style>
@@ -409,23 +514,23 @@ nano admin.html
     <h1>🌐 로봇 관제탑 & 원격 조종 모듈</h1>
 
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-
+        
         <div class="panel" style="flex: 1; min-width: 320px;">
             <h3>📷 실시간 CCTV & 수동 조종</h3>
             <div class="cctv-container">
                 <img id="cctv" src="" alt="스마트폰 연결 대기중...">
             </div>
-
+            
             <div style="text-align: center; margin-bottom: 15px;">
                 <button class="btn btn-red" onclick="setPhase('MANUAL')">🚨 수동 모드 (강제정지)</button>
                 <button class="btn btn-green" onclick="setPhase('IDLE')">✅ 자동 투어 복귀</button>
             </div>
 
             <div class="d-pad">
-                <button class="btn-up" onmousedown="moveRobot(0.1, 0)" onmouseup="stopRobot()">전진</button>
-                <button class="btn-left" onmousedown="moveRobot(0, 0.5)" onmouseup="stopRobot()">좌</button>
-                <button class="btn-right" onmousedown="moveRobot(0, -0.5)" onmouseup="stopRobot()">우</button>
-                <button class="btn-down" onmousedown="moveRobot(-0.1, 0)" onmouseup="stopRobot()">후진</button>
+                <button class="btn-up" onmousedown="moveRobot(0.2, 0)" onmouseup="stopRobot()">전진</button>
+                <button class="btn-left" onmousedown="moveRobot(0, 1.0)" onmouseup="stopRobot()">좌</button>
+                <button class="btn-right" onmousedown="moveRobot(0, -1.0)" onmouseup="stopRobot()">우</button>
+                <button class="btn-down" onmousedown="moveRobot(-0.2, 0)" onmouseup="stopRobot()">후진</button>
             </div>
             <p style="text-align:center; font-size: 13px; color: #666; margin-top:10px;">* 방향키를 마우스로 꾹 누르면 이동합니다.</p>
         </div>
@@ -435,6 +540,12 @@ nano admin.html
                 <h3>📊 투어 현황 모니터링</h3>
                 <p>현재 상태: <strong id="phase" style="color:blue; font-size:20px;">IDLE</strong></p>
                 <p>진행 상황: <span id="progress">0 / 0</span> (현재 타겟: <span id="current">None</span>)</p>
+                
+                <hr style="border-color: #ddd; margin-top: 15px;">
+                <h4 style="margin-bottom: 5px;">⏱️ 관람 체류 통계</h4>
+                <ul id="statsList" style="text-align: left; font-size: 14px; color: #555; background: #f9f9f9; padding: 15px 25px; border-radius: 5px; max-height: 120px; overflow-y: auto; margin-top: 0;">
+                    <li>아직 기록된 통계가 없습니다.</li>
+                </ul>
             </div>
 
             <div class="panel">
@@ -452,19 +563,20 @@ nano admin.html
 
     <script>
         const ros = new ROSLIB.Ros({ url: 'ws://' + window.location.hostname + ':9090' });
-
+        
         const courseTopic = new ROSLIB.Topic({ ros: ros, name: '/course', messageType: 'std_msgs/String' });
         const stateTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_state', messageType: 'std_msgs/String' });
         const cmdVelTopic = new ROSLIB.Topic({ ros: ros, name: '/cmd_vel', messageType: 'geometry_msgs/Twist' });
         const setPhaseTopic = new ROSLIB.Topic({ ros: ros, name: '/set_phase', messageType: 'std_msgs/String' });
         const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
+        const statsTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_stats', messageType: 'std_msgs/String' });
 
         stateTopic.subscribe((msg) => {
             const state = JSON.parse(msg.data);
             document.getElementById('phase').innerText = state.phase;
             if(state.phase === 'MANUAL') document.getElementById('phase').style.color = 'red';
             else document.getElementById('phase').style.color = 'blue';
-
+            
             document.getElementById('progress').innerText = `${state.idx + 1} / ${state.total}`;
             document.getElementById('current').innerText = state.current_exhibit;
         });
@@ -473,14 +585,27 @@ nano admin.html
             document.getElementById('cctv').src = msg.data;
         });
 
+        statsTopic.subscribe((msg) => {
+            const statsArray = JSON.parse(msg.data);
+            const statsList = document.getElementById('statsList');
+            statsList.innerHTML = ''; 
+            statsArray.forEach(stat => {
+                const li = document.createElement('li');
+                li.innerText = stat;
+                statsList.appendChild(li);
+            });
+            statsList.scrollTop = statsList.scrollHeight;
+        });
+
         function sendCourse() {
             const data = document.getElementById('courseJson').value;
             try {
-                JSON.parse(data);
-                courseTopic.publish(new ROSLIB.Message({ data: data }));
+                const parsedData = JSON.parse(data); 
+                const cleanData = JSON.stringify(parsedData);
+                courseTopic.publish(new ROSLIB.Message({ data: cleanData }));
                 alert("코스가 성공적으로 전송되었습니다!");
             } catch (e) {
-                alert("JSON 형식이 잘못되었습니다. 오타를 확인해주세요.");
+                alert("JSON 형식이 잘못되었습니다.\n따옴표나 콤마 오타를 확인해주세요!\n\n상세 에러: " + e.message);
             }
         }
 
@@ -502,7 +627,6 @@ nano admin.html
     </script>
 </body>
 </html>
-
 ```
 
 ---

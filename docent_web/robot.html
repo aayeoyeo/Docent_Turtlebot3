@@ -13,16 +13,39 @@
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; background: #000; }
         button { padding: 15px 30px; font-size: 20px; margin: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;}
         .status { margin-top: 20px; padding: 10px; background: #333; border-radius: 5px; }
+        
+        /* [LCD 대체] 전시물 이름 표시 전용 스타일 */
+        #exhibitDisplay { 
+            margin: 15px auto; 
+            padding: 15px; 
+            max-width: 370px; 
+            background-color: #111; 
+            border: 3px solid #4CAF50; 
+            border-radius: 8px; 
+            font-size: 26px; 
+            font-weight: bold; 
+            color: #2ecc71;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
     </style>
 </head>
 <body>
     <h1>🤖 도슨트 센서 모듈</h1>
     <button id="startBtn">투어 준비 (클릭 필수)</button>
+    
     <div id="reader"></div>
+    
+    <div id="exhibitDisplay">📢 안내 대기 중</div>
+
     <div class="status">
         <p>ROS 연결 상태: <span id="ros_status" style="color:red;">끊김</span></p>
         <p>최근 본 QR: <span id="last_qr">-</span></p>
         <button id="faceBtn" style="background-color: #008CBA; pointer-events: none;">👤 관람객 대기 중...</button>
+        
+        <hr style="border-color: #555; margin: 15px 0;">
+        <p>🗣️ <strong>TTS 재생 설정</strong></p>
+        <label for="rateSlider">재생 속도: <span id="rateValue">1.0</span>x</label><br>
+        <input type="range" id="rateSlider" min="0.5" max="2.0" step="0.1" value="1.0" style="width: 80%;">
     </div>
 
     <script>
@@ -33,33 +56,89 @@
         ros.on('error', () => { document.getElementById('ros_status').innerText = '에러'; });
         ros.on('close', () => { document.getElementById('ros_status').innerText = '끊김'; document.getElementById('ros_status').style.color = 'red'; });
 
-        // 토픽 정의
         const ttsTextTopic = new ROSLIB.Topic({ ros: ros, name: '/tts_text', messageType: 'std_msgs/String' });
         const ttsDoneTopic = new ROSLIB.Topic({ ros: ros, name: '/tts_done', messageType: 'std_msgs/Bool' });
         const qrTopic = new ROSLIB.Topic({ ros: ros, name: '/exhibit_seen', messageType: 'std_msgs/String' });
         const audienceTopic = new ROSLIB.Topic({ ros: ros, name: '/audience', messageType: 'std_msgs/Bool' });
         const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
+        
+        // 로봇 현황 구독 토픽 추가
+        const stateTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_state', messageType: 'std_msgs/String' });
 
-        // 2. TTS 설정
+        // 2. TTS 설정 (속도 조절 및 버그 방어)
         let ttsEnabled = false;
+        const rateSlider = document.getElementById('rateSlider');
+        const rateValue = document.getElementById('rateValue');
+        
+        // 메모리 증발 방지용 전역 배열
+        window.utterances = []; 
+
+        rateSlider.oninput = function() { rateValue.innerText = this.value; }
+
         document.getElementById('startBtn').addEventListener('click', () => {
             ttsEnabled = true;
             document.getElementById('startBtn').innerText = "준비 완료 (재생 대기중)";
             document.getElementById('startBtn').style.backgroundColor = "#555";
-            const u = new SpeechSynthesisUtterance(""); 
-            window.speechSynthesis.speak(u);
+            
+            // 모바일 오디오 권한 뚫기용
+            const emptyUtterance = new SpeechSynthesisUtterance(""); 
+            window.speechSynthesis.speak(emptyUtterance); 
         });
 
         ttsTextTopic.subscribe((msg) => {
             if(!ttsEnabled) return alert("투어 준비 버튼을 먼저 눌러주세요!");
+            
+            // 기존 발화 캔슬
+            window.speechSynthesis.cancel();
+
             const u = new SpeechSynthesisUtterance(msg.data);
+            window.utterances.push(u); // 브라우저가 u 객체를 지우지 못하도록 레퍼런스 유지
+            
+            // 크롬 내장 기본 한국어 엔진 사용
             u.lang = 'ko-KR';
-            u.rate = 1.0; 
+            u.rate = parseFloat(rateSlider.value); 
+            
+            // 정상 종료 시퀀스
             u.onend = () => {
                 console.log("TTS 완료, tts_done 발행");
                 ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
             };
+            
+            // 모바일 브라우저 버그로 인한 무한 멈춤 방지
+            u.onerror = (e) => {
+                console.error("TTS 에러 발생: ", e);
+                ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
+            };
+
             window.speechSynthesis.speak(u);
+        });
+
+        // [LCD 기능 구현] 로봇 상태 및 전시물 이름 표시 제어
+        stateTopic.subscribe((msg) => {
+            const state = JSON.parse(msg.data);
+            const display = document.getElementById('exhibitDisplay');
+            
+            if (state.phase === 'MOVE') {
+                display.innerText = "🏃 목적지로 이동 중...";
+                display.style.color = "#3498db";
+                display.style.borderColor = "#3498db";
+            } else if (state.phase === 'EXPLAIN') {
+                display.innerText = `🎨 전시물: ${state.current_title}`;
+                display.style.color = "#2ecc71";
+                display.style.borderColor = "#2ecc71";
+            } else if (state.phase === 'CHECK') {
+                display.innerText = "👤 관람객 확인 중...";
+                display.style.color = "#f1c40f";
+                display.style.borderColor = "#f1c40f";
+            } else if (state.phase === 'MANUAL') {
+                display.innerText = "🚨 수동 제어 모드";
+                display.style.color = "#e74c3c";
+                display.style.borderColor = "#e74c3c";
+            } else {
+                display.innerText = "📢 안내 대기 중";
+                display.style.color = "#ffffff";
+                display.style.borderColor = "#ffffff";
+            }
         });
 
         // 3. QR 스캐너 설정
@@ -77,7 +156,6 @@
             const videoElement = document.querySelector('#reader video');
             
             if (videoElement) {
-                // [A] tracking.js 얼굴 인식기 세팅
                 const tracker = new tracking.ObjectTracker('face');
                 tracker.setInitialScale(4);
                 tracker.setStepSize(2);
@@ -100,22 +178,18 @@
                     }
                 });
 
-                // [B] CCTV 영상 캡처 및 전송
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = 320;  // 통신 부하 방지용 저해상도
+                canvas.width = 320;  
                 canvas.height = 240;
 
                 setInterval(() => {
                     if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                        const frameData = canvas.toDataURL('image/jpeg', 0.3); // 화질 압축
+                        const frameData = canvas.toDataURL('image/jpeg', 0.3); 
                         cameraStreamTopic.publish(new ROSLIB.Message({ data: frameData }));
                     }
-                }, 250); // 0.25초 단위 전송
-
-            } else {
-                console.error("비디오 태그를 찾을 수 없습니다.");
+                }, 250); 
             }
         }, 3000);
     </script>

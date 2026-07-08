@@ -13,5 +13,3 @@ Installing docent_node script to /home/robot/여/project-root/ros2_ws/install/do
 
 Installed /home/robot/여/project-root/ros2_ws/build/docent_robot
 running symlink_data
-symbolically linking /home/robot/여/project-root/ros2_ws/build/docent_robot/resource/docent_robot -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/ament_index/resource_index/packages
-symbolically linking /home/robot/여/project-root/ros2_ws/build/docent_robot/package.xml -> /home/robot/여/project-root/ros2_ws/install/docent_robot/share/docent_robot

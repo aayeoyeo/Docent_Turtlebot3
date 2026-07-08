@@ -1,0 +1,94 @@
+[0.000000] (-) TimerEvent: {}
+[0.001220] (docent_robot) JobQueued: {'identifier': 'docent_robot', 'dependencies': OrderedDict()}
+[0.001446] (docent_robot) JobStarted: {'identifier': 'docent_robot'}
+[0.098049] (-) TimerEvent: {}
+[0.198972] (-) TimerEvent: {}
+[0.299585] (-) TimerEvent: {}
+[0.400306] (-) TimerEvent: {}
+[0.501143] (-) TimerEvent: {}
+[0.602014] (-) TimerEvent: {}
+[0.702830] (-) TimerEvent: {}
+[0.803414] (-) TimerEvent: {}
+[0.904050] (-) TimerEvent: {}
+[1.004651] (-) TimerEvent: {}
+[1.105363] (-) TimerEvent: {}
+[1.206213] (-) TimerEvent: {}
+[1.307005] (-) TimerEvent: {}
+[1.408062] (-) TimerEvent: {}
+[1.508906] (-) TimerEvent: {}
+[1.609555] (-) TimerEvent: {}
+[1.710312] (-) TimerEvent: {}
+[1.811049] (-) TimerEvent: {}
+[1.911692] (-) TimerEvent: {}
+[2.012506] (-) TimerEvent: {}
+[2.113362] (-) TimerEvent: {}
+[2.214060] (-) TimerEvent: {}
+[2.314807] (-) TimerEvent: {}
+[2.415666] (-) TimerEvent: {}
+[2.516355] (-) TimerEvent: {}
+[2.617067] (-) TimerEvent: {}
+[2.717703] (-) TimerEvent: {}
+[2.818473] (-) TimerEvent: {}
+[2.919288] (-) TimerEvent: {}
+[3.019919] (-) TimerEvent: {}
+[3.120537] (-) TimerEvent: {}
+[3.221287] (-) TimerEvent: {}
+[3.322448] (-) TimerEvent: {}
+[3.423379] (-) TimerEvent: {}
+[3.524036] (-) TimerEvent: {}
+[3.624669] (-) TimerEvent: {}
+[3.725276] (-) TimerEvent: {}
+[3.825902] (-) TimerEvent: {}
+[3.926532] (-) TimerEvent: {}
+[4.027231] (-) TimerEvent: {}
+[4.127822] (-) TimerEvent: {}
+[4.228423] (-) TimerEvent: {}
+[4.329079] (-) TimerEvent: {}
+[4.429730] (-) TimerEvent: {}
+[4.530387] (-) TimerEvent: {}
+[4.631036] (-) TimerEvent: {}
+[4.731850] (-) TimerEvent: {}
+[4.787637] (docent_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'develop', '--editable', '--build-directory', '/home/robot/여/project-root/ros2_ws/build/docent_robot/build', '--no-deps', 'symlink_data'], 'cwd': '/home/robot/여/project-root/ros2_ws/build/docent_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'robot', 'SSH_CLIENT': '192.168.0.42 33756 22', 'LC_TIME': 'ko_KR.UTF-8', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/robot', 'OLDPWD': '/home/robot/여/project-root', 'SSH_TTY': '/dev/pts/1', 'ROS_PYTHON_VERSION': '3', 'LC_MONETARY': 'ko_KR.UTF-8', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'ROS_DISTRO': 'humble', 'LOGNAME': 'robot', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '49', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'LC_ADDRESS': 'ko_KR.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'en_US.UTF-8', 'LC_TELEPHONE': 'ko_KR.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '30', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'SHELL': '/bin/bash', 'LC_NAME': 'ko_KR.UTF-8', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'ko_KR.UTF-8', 'LC_IDENTIFICATION': 'ko_KR.UTF-8', 'PWD': '/home/robot/여/project-root/ros2_ws/build/docent_robot', 'TURTLEBOT3_MODEL': 'burger', 'LC_ALL': 'en_US.UTF-8', 'SSH_CONNECTION': '192.168.0.42 33756 192.168.0.8 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'LDS_MODEL': 'LDS-03', 'PYTHONPATH': '/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'LC_NUMERIC': 'ko_KR.UTF-8', 'LC_PAPER': 'ko_KR.UTF-8', 'COLCON': '1'}, 'shell': False}
+[4.832079] (-) TimerEvent: {}
+[4.933054] (-) TimerEvent: {}
+[5.033660] (-) TimerEvent: {}
+[5.134309] (-) TimerEvent: {}
+[5.234939] (-) TimerEvent: {}
+[5.335580] (-) TimerEvent: {}
+[5.436274] (-) TimerEvent: {}
+[5.536933] (-) TimerEvent: {}
+[5.637536] (-) TimerEvent: {}
+[5.738138] (-) TimerEvent: {}
+[5.838808] (-) TimerEvent: {}
+[5.939538] (-) TimerEvent: {}
+[6.040126] (-) TimerEvent: {}
+[6.093204] (docent_robot) StdoutLine: {'line': b'running develop\n'}
+[6.140279] (-) TimerEvent: {}
+[6.240886] (-) TimerEvent: {}
+[6.341534] (-) TimerEvent: {}
+[6.442146] (-) TimerEvent: {}
+[6.542777] (-) TimerEvent: {}
+[6.643379] (-) TimerEvent: {}
+[6.743989] (-) TimerEvent: {}
+[6.844606] (-) TimerEvent: {}
+[6.945239] (-) TimerEvent: {}
+[7.021752] (docent_robot) StdoutLine: {'line': b'running egg_info\n'}
+[7.022424] (docent_robot) StdoutLine: {'line': b'writing docent_robot.egg-info/PKG-INFO\n'}
+[7.023548] (docent_robot) StdoutLine: {'line': b'writing dependency_links to docent_robot.egg-info/dependency_links.txt\n'}
+[7.024419] (docent_robot) StdoutLine: {'line': b'writing entry points to docent_robot.egg-info/entry_points.txt\n'}
+[7.025130] (docent_robot) StdoutLine: {'line': b'writing requirements to docent_robot.egg-info/requires.txt\n'}
+[7.025622] (docent_robot) StdoutLine: {'line': b'writing top-level names to docent_robot.egg-info/top_level.txt\n'}
+[7.033801] (docent_robot) StdoutLine: {'line': b"reading manifest file 'docent_robot.egg-info/SOURCES.txt'\n"}
+[7.037220] (docent_robot) StdoutLine: {'line': b"writing manifest file 'docent_robot.egg-info/SOURCES.txt'\n"}
+[7.043525] (docent_robot) StdoutLine: {'line': b'running build_ext\n'}
+[7.044337] (docent_robot) StdoutLine: {'line': b'Creating /home/robot/\xec\x97\xac/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent-robot.egg-link (link to .)\n'}
+[7.045357] (-) TimerEvent: {}
+[7.048299] (docent_robot) StdoutLine: {'line': b'Installing docent_node script to /home/robot/\xec\x97\xac/project-root/ros2_ws/install/docent_robot/lib/docent_robot\n'}
+[7.049754] (docent_robot) StdoutLine: {'line': b'\n'}
+[7.050498] (docent_robot) StdoutLine: {'line': b'Installed /home/robot/\xec\x97\xac/project-root/ros2_ws/build/docent_robot\n'}
+[7.050917] (docent_robot) StdoutLine: {'line': b'running symlink_data\n'}
+[7.145701] (-) TimerEvent: {}
+[7.190243] (docent_robot) CommandEnded: {'returncode': 0}
+[7.247973] (-) TimerEvent: {}
+[7.254204] (docent_robot) JobEnded: {'identifier': 'docent_robot', 'rc': 0}
+[7.257017] (-) EventReactorShutdown: {}

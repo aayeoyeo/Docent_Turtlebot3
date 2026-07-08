@@ -1,13 +1,6 @@
 package.xml
 setup.cfg
 setup.py
-../../build/docent_robot/docent_robot.egg-info/PKG-INFO
-../../build/docent_robot/docent_robot.egg-info/SOURCES.txt
-../../build/docent_robot/docent_robot.egg-info/dependency_links.txt
-../../build/docent_robot/docent_robot.egg-info/entry_points.txt
-../../build/docent_robot/docent_robot.egg-info/requires.txt
-../../build/docent_robot/docent_robot.egg-info/top_level.txt
-../../build/docent_robot/docent_robot.egg-info/zip-safe
 docent_robot/__init__.py
 docent_robot/docent_node.py
 docent_robot.egg-info/PKG-INFO

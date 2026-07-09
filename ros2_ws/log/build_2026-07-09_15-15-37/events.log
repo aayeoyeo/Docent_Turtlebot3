@@ -1,0 +1,90 @@
+[0.000000] (-) TimerEvent: {}
+[0.001297] (docent_robot) JobQueued: {'identifier': 'docent_robot', 'dependencies': OrderedDict()}
+[0.001518] (docent_robot) JobStarted: {'identifier': 'docent_robot'}
+[0.097986] (-) TimerEvent: {}
+[0.198704] (-) TimerEvent: {}
+[0.299459] (-) TimerEvent: {}
+[0.400465] (-) TimerEvent: {}
+[0.501065] (-) TimerEvent: {}
+[0.601869] (-) TimerEvent: {}
+[0.702536] (-) TimerEvent: {}
+[0.803190] (-) TimerEvent: {}
+[0.903816] (-) TimerEvent: {}
+[1.004410] (-) TimerEvent: {}
+[1.105084] (-) TimerEvent: {}
+[1.206013] (-) TimerEvent: {}
+[1.307276] (-) TimerEvent: {}
+[1.407899] (-) TimerEvent: {}
+[1.508605] (-) TimerEvent: {}
+[1.609243] (-) TimerEvent: {}
+[1.709896] (-) TimerEvent: {}
+[1.810788] (-) TimerEvent: {}
+[1.911392] (-) TimerEvent: {}
+[2.011979] (-) TimerEvent: {}
+[2.112611] (-) TimerEvent: {}
+[2.213208] (-) TimerEvent: {}
+[2.313820] (-) TimerEvent: {}
+[2.414437] (-) TimerEvent: {}
+[2.515073] (-) TimerEvent: {}
+[2.615731] (-) TimerEvent: {}
+[2.716442] (-) TimerEvent: {}
+[2.817052] (-) TimerEvent: {}
+[2.917823] (-) TimerEvent: {}
+[3.018825] (-) TimerEvent: {}
+[3.119787] (-) TimerEvent: {}
+[3.220588] (-) TimerEvent: {}
+[3.321255] (-) TimerEvent: {}
+[3.421944] (-) TimerEvent: {}
+[3.522647] (-) TimerEvent: {}
+[3.623285] (-) TimerEvent: {}
+[3.723909] (-) TimerEvent: {}
+[3.824524] (-) TimerEvent: {}
+[3.925119] (-) TimerEvent: {}
+[4.025793] (-) TimerEvent: {}
+[4.126504] (-) TimerEvent: {}
+[4.227170] (-) TimerEvent: {}
+[4.327755] (-) TimerEvent: {}
+[4.428496] (-) TimerEvent: {}
+[4.476926] (docent_robot) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'develop', '--editable', '--build-directory', '/home/robot/여/project-root/ros2_ws/build/docent_robot/build', '--no-deps', 'symlink_data'], 'cwd': '/home/robot/여/project-root/ros2_ws/build/docent_robot', 'env': {'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'robot', 'SSH_CLIENT': '192.168.0.42 46292 22', 'LC_TIME': 'ko_KR.UTF-8', 'XDG_SESSION_TYPE': 'tty', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'MOTD_SHOWN': 'pam', 'HOME': '/home/robot', 'OLDPWD': '/home/robot/여/project-root/ros2_ws/src/docent_robot/docent_robot', 'SSH_TTY': '/dev/pts/0', 'ROS_PYTHON_VERSION': '3', 'LC_MONETARY': 'ko_KR.UTF-8', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLCON_PREFIX_PATH': '/home/robot/여/project-root/ros2_ws/install', 'ROS_DISTRO': 'humble', 'LOGNAME': 'robot', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'XDG_SESSION_CLASS': 'user', 'TERM': 'xterm-256color', 'XDG_SESSION_ID': '1', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin', 'LC_ADDRESS': 'ko_KR.UTF-8', 'XDG_RUNTIME_DIR': '/run/user/1000', 'LANG': 'en_US.UTF-8', 'LC_TELEPHONE': 'ko_KR.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '10', 'AMENT_PREFIX_PATH': '/home/robot/여/project-root/ros2_ws/install/docent_robot:/opt/ros/humble', 'SHELL': '/bin/bash', 'LC_NAME': 'ko_KR.UTF-8', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'LC_MEASUREMENT': 'ko_KR.UTF-8', 'LC_IDENTIFICATION': 'ko_KR.UTF-8', 'PWD': '/home/robot/여/project-root/ros2_ws/build/docent_robot', 'TURTLEBOT3_MODEL': 'burger', 'LC_ALL': 'en_US.UTF-8', 'SSH_CONNECTION': '192.168.0.42 46292 192.168.0.8 22', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'LDS_MODEL': 'LDS-03', 'PYTHONPATH': '/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:/home/robot/여/project-root/ros2_ws/build/docent_robot:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'LC_NUMERIC': 'ko_KR.UTF-8', 'LC_PAPER': 'ko_KR.UTF-8', 'COLCON': '1'}, 'shell': False}
+[4.528658] (-) TimerEvent: {}
+[4.629498] (-) TimerEvent: {}
+[4.730181] (-) TimerEvent: {}
+[4.830950] (-) TimerEvent: {}
+[4.931589] (-) TimerEvent: {}
+[5.032200] (-) TimerEvent: {}
+[5.132895] (-) TimerEvent: {}
+[5.233491] (-) TimerEvent: {}
+[5.334086] (-) TimerEvent: {}
+[5.434726] (-) TimerEvent: {}
+[5.535474] (-) TimerEvent: {}
+[5.636274] (-) TimerEvent: {}
+[5.736919] (-) TimerEvent: {}
+[5.745354] (docent_robot) StdoutLine: {'line': b'running develop\n'}
+[5.837071] (-) TimerEvent: {}
+[5.937677] (-) TimerEvent: {}
+[6.038310] (-) TimerEvent: {}
+[6.138945] (-) TimerEvent: {}
+[6.239606] (-) TimerEvent: {}
+[6.340408] (-) TimerEvent: {}
+[6.441043] (-) TimerEvent: {}
+[6.541630] (-) TimerEvent: {}
+[6.598739] (docent_robot) StdoutLine: {'line': b'running egg_info\n'}
+[6.599404] (docent_robot) StdoutLine: {'line': b'writing docent_robot.egg-info/PKG-INFO\n'}
+[6.600503] (docent_robot) StdoutLine: {'line': b'writing dependency_links to docent_robot.egg-info/dependency_links.txt\n'}
+[6.601278] (docent_robot) StdoutLine: {'line': b'writing entry points to docent_robot.egg-info/entry_points.txt\n'}
+[6.601971] (docent_robot) StdoutLine: {'line': b'writing requirements to docent_robot.egg-info/requires.txt\n'}
+[6.602533] (docent_robot) StdoutLine: {'line': b'writing top-level names to docent_robot.egg-info/top_level.txt\n'}
+[6.610513] (docent_robot) StdoutLine: {'line': b"reading manifest file 'docent_robot.egg-info/SOURCES.txt'\n"}
+[6.613804] (docent_robot) StdoutLine: {'line': b"writing manifest file 'docent_robot.egg-info/SOURCES.txt'\n"}
+[6.619571] (docent_robot) StdoutLine: {'line': b'running build_ext\n'}
+[6.620449] (docent_robot) StdoutLine: {'line': b'Creating /home/robot/\xec\x97\xac/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent-robot.egg-link (link to .)\n'}
+[6.625078] (docent_robot) StdoutLine: {'line': b'Installing docent_node script to /home/robot/\xec\x97\xac/project-root/ros2_ws/install/docent_robot/lib/docent_robot\n'}
+[6.626613] (docent_robot) StdoutLine: {'line': b'\n'}
+[6.627316] (docent_robot) StdoutLine: {'line': b'Installed /home/robot/\xec\x97\xac/project-root/ros2_ws/build/docent_robot\n'}
+[6.627713] (docent_robot) StdoutLine: {'line': b'running symlink_data\n'}
+[6.642038] (-) TimerEvent: {}
+[6.743211] (-) TimerEvent: {}
+[6.769530] (docent_robot) CommandEnded: {'returncode': 0}
+[6.843197] (docent_robot) JobEnded: {'identifier': 'docent_robot', 'rc': 0}
+[6.845754] (-) TimerEvent: {}
+[6.846054] (-) EventReactorShutdown: {}

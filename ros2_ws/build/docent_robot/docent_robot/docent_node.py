@@ -7,88 +7,103 @@ from std_msgs.msg import String, Bool
 from geometry_msgs.msg import Twist
 
 CRUISE = 0.08
-WAIT_AUDIENCE = 20.0       # 관람객 미확인 최대 대기 (초)
-MOVE_TIMEOUT = 30.0        # QR 미인식 시 최대 이동 시간 (초)
+WAIT_AUDIENCE = 20.0
+MOVE_TIMEOUT = 30.0
 
 class DocentNode(Node):
     def __init__(self):
         super().__init__('docent_node')
-        # Subscriber 등록
         self.sub_course = self.create_subscription(String, '/course', self.on_course, 10)
         self.sub_qr = self.create_subscription(String, '/exhibit_seen', self.on_qr, 10)
         self.sub_tts = self.create_subscription(Bool, '/tts_done', self.on_tts_done, 10)
         self.sub_face = self.create_subscription(Bool, '/audience', self.on_audience, 10)
         self.sub_phase = self.create_subscription(String, '/set_phase', self.on_set_phase, 10)
-        
-        # Publisher 등록
+
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pub_tts = self.create_publisher(String, '/tts_text', 10)
         self.pub_state = self.create_publisher(String, '/tour_state', 10)
         self.pub_stats = self.create_publisher(String, '/tour_stats', 10)
-        
-        # 상태 변수 초기화
-        self.course = []          
+
+        self.course = []
         self.idx = 0
-        self.phase = 'IDLE'       
+        self.phase = 'IDLE'
         self.audience = False
         self.state_since = time.time()
-        
-        # [S3] 도착 시간 및 통계 리스트 초기화
         self.arrive_time = 0.0
         self.tour_stats = []
-        
-        # 10Hz 제어 타이머 주기 구동
+        self.last_exhibit_id = ""
+        self.macro_queue = []
+        self.current_macro = None
+        self.macro_start_time = 0.0
+        self.last_cmd = Twist()
+
         self.timer = self.create_timer(0.1, self.tick)
-        self.get_logger().info('도슨트 로봇 백엔드 시스템 구동 완료')
+        self.get_logger().info('🤖 도슨트 로봇 백엔드 시스템 구동 완료! 대기 중입니다.')
 
     def broadcast(self):
         msg = String()
         msg.data = json.dumps({
-            'phase': self.phase, 
+            'phase': self.phase,
             'idx': self.idx,
             'total': len(self.course),
             'current_exhibit': self.course[self.idx]['id'] if self.course and self.idx < len(self.course) else 'None',
-            # [LCD 대체] 현재 전시물의 실제 제목 전송
             'current_title': self.course[self.idx]['title'] if self.course and self.idx < len(self.course) else 'None'
         }, ensure_ascii=False)
         self.pub_state.publish(msg)
 
     def on_set_phase(self, msg):
-        self.get_logger().warn(f"관리자 개입: 상태가 {msg.data}(으)로 강제 전환됩니다.")
-        stop_cmd = Twist()
-        self.pub_vel.publish(stop_cmd)
         self.phase = msg.data
         self.state_since = time.time()
+        if self.phase == 'IDLE':
+            self.pub_vel.publish(Twist())
+            self.last_cmd = Twist()
         self.broadcast()
 
     def on_course(self, msg):
-        self.get_logger().info('새로운 코스가 할당되었습니다.')
         self.course = json.loads(msg.data)
         self.idx = 0
-        self.phase = 'MOVE'
-        self.state_since = time.time()
+        self.last_exhibit_id = ""
+        self.tour_stats = []
+        self.prepare_next_move()
         self.broadcast()
 
+    def prepare_next_move(self):
+        if self.course and self.idx < len(self.course):
+            current_exhibit = self.course[self.idx]
+            if 'macro' in current_exhibit and isinstance(current_exhibit['macro'], list) and len(current_exhibit['macro']) > 0:
+                self.macro_queue = list(current_exhibit['macro'])
+                self.current_macro = None
+                self.phase = 'MACRO'
+                self.get_logger().info(f"[{current_exhibit['id']}] 향해 매크로 주행 시작.")
+            else:
+                self.phase = 'MOVE'
+                self.publish_twist(CRUISE, 0.0)
+                self.get_logger().info(f"[{current_exhibit['id']}] 향해 일반 직진 주행 시작.")
+        else:
+            self.phase = 'IDLE'
+            self.pub_vel.publish(Twist())
+            self.last_cmd = Twist()
+        self.state_since = time.time()
+
     def on_qr(self, msg):
-        if self.phase == 'MOVE' and self.course:
-            if msg.data == self.course[self.idx]['id']:
-                self.get_logger().info(f"전시물 {msg.data} 도착. 해설을 시작합니다.")
-                
-                stop_cmd = Twist()
-                self.pub_vel.publish(stop_cmd)
-                
-                # [S3] 도착 시간 기록
-                self.arrive_time = time.time()
-                
-                self.phase = 'EXPLAIN'
-                tts = String()
-                tts.data = self.course[self.idx]['script']
-                self.pub_tts.publish(tts)
-                self.broadcast()
+        if self.phase in ['MOVE', 'MACRO'] and self.course:
+            if msg.data == self.last_exhibit_id:
+                return
+            for i, exhibit in enumerate(self.course):
+                if msg.data == exhibit['id']:
+                    self.idx = i
+                    self.phase = 'EXPLAIN'
+                    self.arrive_time = time.time()
+                    self.pub_vel.publish(Twist())
+                    self.last_cmd = Twist()
+                    tts = String()
+                    tts.data = self.course[self.idx]['script']
+                    self.pub_tts.publish(tts)
+                    self.broadcast()
+                    break
 
     def on_tts_done(self, msg):
         if self.phase == 'EXPLAIN' and msg.data:
-            self.get_logger().info("해설 완료. 관람객을 확인합니다.")
             self.phase = 'CHECK'
             self.state_since = time.time()
             self.broadcast()
@@ -96,45 +111,59 @@ class DocentNode(Node):
     def on_audience(self, msg):
         self.audience = bool(msg.data)
 
+    def publish_twist(self, linear, angular):
+        cmd = Twist()
+        cmd.linear.x = float(linear)
+        cmd.angular.z = float(angular)
+        if cmd.linear.x != self.last_cmd.linear.x or cmd.angular.z != self.last_cmd.angular.z:
+            self.pub_vel.publish(cmd)
+            self.last_cmd = cmd
+
     def tick(self):
         now = time.time()
         elapsed = now - self.state_since
-        
-        if self.phase == 'MOVE':
-            if elapsed > MOVE_TIMEOUT:
-                self.get_logger().warn("QR 미인식 타임아웃! 로봇을 정지합니다.")
-                stop_cmd = Twist()
-                self.pub_vel.publish(stop_cmd)
-                self.phase = 'IDLE'
-                self.broadcast()
-            else:
-                cmd = Twist()
-                cmd.linear.x = CRUISE
-                self.pub_vel.publish(cmd)
-                
-        elif self.phase == 'CHECK':
-            if self.audience or elapsed > WAIT_AUDIENCE:
-                
-                # [S3] 체류 시간 계산 및 발행
-                dwell_time = time.time() - self.arrive_time
-                stat_msg = f"{self.course[self.idx]['title']} - 체류시간: {dwell_time:.1f}초"
-                self.tour_stats.append(stat_msg)
-                
-                stats_json = String()
-                stats_json.data = json.dumps(self.tour_stats, ensure_ascii=False)
-                self.pub_stats.publish(stats_json)
 
-                if self.audience:
-                    self.get_logger().info("관람객 확인됨. 다음 코스로 이동.")
+        if self.phase == 'MACRO':
+            if self.current_macro is None:
+                if len(self.macro_queue) > 0:
+                    self.current_macro = self.macro_queue.pop(0)
+                    self.macro_start_time = now
                 else:
-                    self.get_logger().warn("관람객 부재. 20초 경과로 다음 코스로 강제 이동.")
-                
-                self.idx += 1
-                if self.idx < len(self.course):
                     self.phase = 'MOVE'
                     self.state_since = time.time()
-                else:
-                    self.phase = 'IDLE'
+                    self.publish_twist(CRUISE, 0.0)
+                    self.broadcast()
+                    return
+            macro_elapsed = now - self.macro_start_time
+            if macro_elapsed < self.current_macro['duration']:
+                self.publish_twist(self.current_macro['linear'], self.current_macro['angular'])
+            else:
+                self.current_macro = None
+
+        elif self.phase == 'MOVE':
+            if elapsed > MOVE_TIMEOUT:
+                self.phase = 'IDLE'
+                self.pub_vel.publish(Twist())
+                self.last_cmd = Twist()
+                self.broadcast()
+            else:
+                self.publish_twist(CRUISE, 0.0)
+
+        elif self.phase == 'CHECK':
+            if self.audience or elapsed > WAIT_AUDIENCE:
+                duration = time.time() - self.arrive_time
+                self.tour_stats.append({
+                    'id': self.course[self.idx]['id'],
+                    'title': self.course[self.idx]['title'],
+                    'duration': round(duration, 1)
+                })
+                stats_msg = String()
+                stats_msg.data = json.dumps(self.tour_stats, ensure_ascii=False)
+                self.pub_stats.publish(stats_msg)
+
+                self.last_exhibit_id = self.course[self.idx]['id']
+                self.idx += 1
+                self.prepare_next_move()
                 self.broadcast()
 
 def main():

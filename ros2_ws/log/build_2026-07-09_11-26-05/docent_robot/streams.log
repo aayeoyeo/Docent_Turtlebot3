@@ -1,0 +1,17 @@
+[4.291s] Invoking command in '/home/robot/여/project-root/ros2_ws/build/docent_robot': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data
+[5.513s] running develop
+[6.349s] running egg_info
+[6.349s] writing docent_robot.egg-info/PKG-INFO
+[6.351s] writing dependency_links to docent_robot.egg-info/dependency_links.txt
+[6.351s] writing entry points to docent_robot.egg-info/entry_points.txt
+[6.352s] writing requirements to docent_robot.egg-info/requires.txt
+[6.353s] writing top-level names to docent_robot.egg-info/top_level.txt
+[6.361s] reading manifest file 'docent_robot.egg-info/SOURCES.txt'
+[6.364s] writing manifest file 'docent_robot.egg-info/SOURCES.txt'
+[6.370s] running build_ext
+[6.370s] Creating /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages/docent-robot.egg-link (link to .)
+[6.374s] Installing docent_node script to /home/robot/여/project-root/ros2_ws/install/docent_robot/lib/docent_robot
+[6.376s] 
+[6.376s] Installed /home/robot/여/project-root/ros2_ws/build/docent_robot
+[6.376s] running symlink_data
+[6.514s] Invoked command in '/home/robot/여/project-root/ros2_ws/build/docent_robot' returned '0': PYTHONPATH=/home/robot/여/project-root/ros2_ws/build/docent_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/robot/여/project-root/ros2_ws/install/docent_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/robot/여/project-root/ros2_ws/build/docent_robot/build --no-deps symlink_data

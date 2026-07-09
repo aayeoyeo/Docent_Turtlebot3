@@ -13,17 +13,15 @@
         #reader { width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; background: #000; }
         button { padding: 15px 30px; font-size: 20px; margin: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;}
         .status { margin-top: 20px; padding: 10px; background: #333; border-radius: 5px; }
-        
-        /* [LCD 대체] 전시물 이름 표시 전용 스타일 */
-        #exhibitDisplay { 
-            margin: 15px auto; 
-            padding: 15px; 
-            max-width: 370px; 
-            background-color: #111; 
-            border: 3px solid #4CAF50; 
-            border-radius: 8px; 
-            font-size: 26px; 
-            font-weight: bold; 
+        #exhibitDisplay {
+            margin: 15px auto;
+            padding: 15px;
+            max-width: 370px;
+            background-color: #111;
+            border: 3px solid #4CAF50;
+            border-radius: 8px;
+            font-size: 26px;
+            font-weight: bold;
             color: #2ecc71;
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
@@ -32,16 +30,16 @@
 <body>
     <h1>🤖 도슨트 센서 모듈</h1>
     <button id="startBtn">투어 준비 (클릭 필수)</button>
-    
+
     <div id="reader"></div>
-    
+
     <div id="exhibitDisplay">📢 안내 대기 중</div>
 
     <div class="status">
         <p>ROS 연결 상태: <span id="ros_status" style="color:red;">끊김</span></p>
         <p>최근 본 QR: <span id="last_qr">-</span></p>
         <button id="faceBtn" style="background-color: #008CBA; pointer-events: none;">👤 관람객 대기 중...</button>
-        
+
         <hr style="border-color: #555; margin: 15px 0;">
         <p>🗣️ <strong>TTS 재생 설정</strong></p>
         <label for="rateSlider">재생 속도: <span id="rateValue">1.0</span>x</label><br>
@@ -49,9 +47,8 @@
     </div>
 
     <script>
-        // 1. ROS 연결
         const ros = new ROSLIB.Ros({ url: 'ws://' + window.location.hostname + ':9090' });
-        
+
         ros.on('connection', () => { document.getElementById('ros_status').innerText = '연결됨'; document.getElementById('ros_status').style.color = 'lime'; });
         ros.on('error', () => { document.getElementById('ros_status').innerText = '에러'; });
         ros.on('close', () => { document.getElementById('ros_status').innerText = '끊김'; document.getElementById('ros_status').style.color = 'red'; });
@@ -61,17 +58,14 @@
         const qrTopic = new ROSLIB.Topic({ ros: ros, name: '/exhibit_seen', messageType: 'std_msgs/String' });
         const audienceTopic = new ROSLIB.Topic({ ros: ros, name: '/audience', messageType: 'std_msgs/Bool' });
         const cameraStreamTopic = new ROSLIB.Topic({ ros: ros, name: '/camera_stream', messageType: 'std_msgs/String' });
-        
-        // 로봇 현황 구독 토픽 추가
         const stateTopic = new ROSLIB.Topic({ ros: ros, name: '/tour_state', messageType: 'std_msgs/String' });
 
-        // 2. TTS 설정 (속도 조절 및 버그 방어)
+        let currentPhase = 'IDLE';
         let ttsEnabled = false;
         const rateSlider = document.getElementById('rateSlider');
         const rateValue = document.getElementById('rateValue');
-        
-        // 메모리 증발 방지용 전역 배열
-        window.utterances = []; 
+
+        window.utterances = [];
 
         rateSlider.oninput = function() { rateValue.innerText = this.value; }
 
@@ -79,45 +73,38 @@
             ttsEnabled = true;
             document.getElementById('startBtn').innerText = "준비 완료 (재생 대기중)";
             document.getElementById('startBtn').style.backgroundColor = "#555";
-            
-            // 모바일 오디오 권한 뚫기용
-            const emptyUtterance = new SpeechSynthesisUtterance(""); 
-            window.speechSynthesis.speak(emptyUtterance); 
+
+            const emptyUtterance = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(emptyUtterance);
         });
 
         ttsTextTopic.subscribe((msg) => {
             if(!ttsEnabled) return alert("투어 준비 버튼을 먼저 눌러주세요!");
-            
-            // 기존 발화 캔슬
+
             window.speechSynthesis.cancel();
 
             const u = new SpeechSynthesisUtterance(msg.data);
-            window.utterances.push(u); // 브라우저가 u 객체를 지우지 못하도록 레퍼런스 유지
-            
-            // 크롬 내장 기본 한국어 엔진 사용
+            window.utterances.push(u);
+
             u.lang = 'ko-KR';
-            u.rate = parseFloat(rateSlider.value); 
-            
-            // 정상 종료 시퀀스
+            u.rate = parseFloat(rateSlider.value);
+
             u.onend = () => {
-                console.log("TTS 완료, tts_done 발행");
                 ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
             };
-            
-            // 모바일 브라우저 버그로 인한 무한 멈춤 방지
+
             u.onerror = (e) => {
-                console.error("TTS 에러 발생: ", e);
                 ttsDoneTopic.publish(new ROSLIB.Message({ data: true }));
             };
 
             window.speechSynthesis.speak(u);
         });
 
-        // [LCD 기능 구현] 로봇 상태 및 전시물 이름 표시 제어
         stateTopic.subscribe((msg) => {
             const state = JSON.parse(msg.data);
+            currentPhase = state.phase;
             const display = document.getElementById('exhibitDisplay');
-            
+
             if (state.phase === 'MOVE') {
                 display.innerText = "🏃 목적지로 이동 중...";
                 display.style.color = "#3498db";
@@ -141,7 +128,6 @@
             }
         });
 
-        // 3. QR 스캐너 설정
         const html5QrCode = new Html5Qrcode("reader");
         const qrCodeSuccessCallback = (decodedText, decodedResult) => {
             document.getElementById('last_qr').innerText = decodedText;
@@ -150,46 +136,99 @@
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback).catch(err => console.log(err));
 
-        // 4 & 5. 관람객 인식 및 CCTV 스트리밍 로직
         let hasAudience = false;
+        
+        // --- 업그레이드된 모션 감지 변수 ---
+        let previousImageData = null;
+        let consecutiveMotion = 0; // 찰나의 흔들림을 거르기 위한 연속 카운터
+
+        function triggerAudienceDetected(methodInfo) {
+            if (!hasAudience) {
+                hasAudience = true;
+                document.getElementById('faceBtn').innerText = `👤 관람객 인식 완료! (${methodInfo})`;
+                document.getElementById('faceBtn').style.backgroundColor = "#4CAF50";
+                audienceTopic.publish(new ROSLIB.Message({ data: true }));
+
+                setTimeout(() => {
+                    hasAudience = false;
+                    document.getElementById('faceBtn').innerText = "👤 관람객 대기 중...";
+                    document.getElementById('faceBtn').style.backgroundColor = "#555";
+                    audienceTopic.publish(new ROSLIB.Message({ data: false }));
+                }, 5000);
+            }
+        }
+
         setTimeout(() => {
             const videoElement = document.querySelector('#reader video');
-            
+
             if (videoElement) {
+                // 1. 얼굴 인식 (그대로 유지)
                 const tracker = new tracking.ObjectTracker('face');
                 tracker.setInitialScale(4);
                 tracker.setStepSize(2);
                 tracker.setEdgesDensity(0.1);
                 tracking.track(videoElement, tracker);
-                
+
                 tracker.on('track', function(event) {
-                    if (event.data.length > 0 && !hasAudience) {
-                        hasAudience = true;
-                        document.getElementById('faceBtn').innerText = "👤 카메라 얼굴 인식 완료!";
-                        document.getElementById('faceBtn').style.backgroundColor = "#4CAF50"; 
-                        audienceTopic.publish(new ROSLIB.Message({ data: true }));
-                        
-                        setTimeout(() => {
-                            hasAudience = false;
-                            document.getElementById('faceBtn').innerText = "👤 관람객 대기 중...";
-                            document.getElementById('faceBtn').style.backgroundColor = "#555";
-                            audienceTopic.publish(new ROSLIB.Message({ data: false }));
-                        }, 5000);
+                    if (currentPhase !== 'CHECK') return;
+                    if (event.data.length > 0) {
+                        triggerAudienceDetected("얼굴");
                     }
                 });
 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = 320;  
+                canvas.width = 320;
                 canvas.height = 240;
 
+                // 2. 고도화된 모션 감지 로직
                 setInterval(() => {
                     if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
                         context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                        const frameData = canvas.toDataURL('image/jpeg', 0.3); 
+                        
+                        if (currentPhase === 'CHECK') {
+                            const currentImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            let motionScore = 0;
+
+                            if (previousImageData) {
+                                // i += 16: 픽셀을 4칸씩 건너뛰며 검사 (미세 노이즈 방어 및 CPU 최적화)
+                                for (let i = 0; i < currentImageData.data.length; i += 16) {
+                                    const rDiff = Math.abs(currentImageData.data[i] - previousImageData.data[i]);
+                                    const gDiff = Math.abs(currentImageData.data[i+1] - previousImageData.data[i+1]);
+                                    const bDiff = Math.abs(currentImageData.data[i+2] - previousImageData.data[i+2]);
+                                    
+                                    // RGB 차이 합이 150 이상일 때만 유의미한 변화로 인정 (빛 반사 무시)
+                                    if (rDiff + gDiff + bDiff > 150) {
+                                        motionScore++;
+                                    }
+                                }
+                            }
+                            
+                            previousImageData = currentImageData;
+
+                            // 화면 픽셀 중 약 5% 이상 크게 바뀌었을 때
+                            if (motionScore > 800) {
+                                consecutiveMotion++; // 연속 카운트 증가
+                                
+                                // 3번 연속 (약 0.75초간) 계속 움직임이 감지되어야 찐 관람객으로 인정
+                                if (consecutiveMotion >= 3) {
+                                    triggerAudienceDetected("모션");
+                                    consecutiveMotion = 0; // 발동 후 리셋
+                                }
+                            } else {
+                                // 잠깐 흔들린 거면 가차 없이 카운터 리셋
+                                consecutiveMotion = 0; 
+                            }
+                        } else {
+                            previousImageData = null; 
+                            consecutiveMotion = 0;
+                        }
+
+                        // CCTV 데이터 전송
+                        const frameData = canvas.toDataURL('image/jpeg', 0.3);
                         cameraStreamTopic.publish(new ROSLIB.Message({ data: frameData }));
                     }
-                }, 250); 
+                }, 250); // 0.25초마다 실행
             }
         }, 3000);
     </script>

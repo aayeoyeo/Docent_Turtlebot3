@@ -3,6 +3,7 @@ setup.cfg
 setup.py
 docent_robot/__init__.py
 docent_robot/docent_node.py
+docent_robot/docent_node_back.py
 docent_robot.egg-info/PKG-INFO
 docent_robot.egg-info/SOURCES.txt
 docent_robot.egg-info/dependency_links.txt
